@@ -35,15 +35,6 @@ class GameScene: SKScene {
 //                                              SKAction.removeFromParent()]))
             self.addChild(spinnyNode)
         }
-
-        if let c = ConnectionManager.instance.connection {
-            print("\(c.state)")
-            c.send(content: "hello it's thumbkiss here".data(using: .ascii), completion: .contentProcessed({ sendError in
-                if let error = sendError {
-                    print("Unable to process and send the data: \(error)")
-                }
-            }))
-        }
     }
     
     
@@ -109,7 +100,16 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
-//        if let n = self.spinnyNode {
-//        }
+        if let n = self.spinnyNode {
+            if let c = ConnectionManager.instance.connection {
+                let screenSize = UIScreen.main.bounds
+                let posNormalized = CGPoint(x: n.position.x / screenSize.width + 0.5, y: n.position.y / screenSize.height + 0.5)
+                c.send(content: "(\(posNormalized.x), \(posNormalized.y))".data(using: .ascii), completion: .contentProcessed({ sendError in
+                    if let error = sendError {
+                        print("Unable to process and send the data: \(error)")
+                    }
+                }))
+            }
+        }
     }
 }
