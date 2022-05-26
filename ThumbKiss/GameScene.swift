@@ -10,7 +10,6 @@ import GameplayKit
 import Network
 
 class GameScene: SKScene {
-    
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
     
@@ -35,6 +34,15 @@ class GameScene: SKScene {
 //                                              SKAction.fadeOut(withDuration: 0.5),
 //                                              SKAction.removeFromParent()]))
             self.addChild(spinnyNode)
+        }
+
+        if let c = ConnectionManager.instance.connection {
+            print("\(c.state)")
+            c.send(content: "hello it's thumbkiss here".data(using: .ascii), completion: .contentProcessed({ sendError in
+                if let error = sendError {
+                    print("Unable to process and send the data: \(error)")
+                }
+            }))
         }
     }
     
@@ -101,5 +109,7 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+//        if let n = self.spinnyNode {
+//        }
     }
 }

@@ -20,6 +20,7 @@
 		64BE91152807AF1000ABE079 /* ThumbKissUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BE91142807AF1000ABE079 /* ThumbKissUITests.swift */; };
 		64BE91172807AF1000ABE079 /* ThumbKissUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BE91162807AF1000ABE079 /* ThumbKissUITestsLaunchTests.swift */; };
 		64EFA89C283C8B970080D6C9 /* ConnectScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EFA89B283C8B970080D6C9 /* ConnectScene.swift */; };
+		64EFA89E283C986F0080D6C9 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EFA89D283C986F0080D6C9 /* ConnectionManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		64BE91142807AF1000ABE079 /* ThumbKissUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbKissUITests.swift; sourceTree = "<group>"; };
 		64BE91162807AF1000ABE079 /* ThumbKissUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbKissUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		64EFA89B283C8B970080D6C9 /* ConnectScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectScene.swift; sourceTree = "<group>"; };
+		64EFA89D283C986F0080D6C9 /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +118,7 @@
 				64BE90FD2807AF1000ABE079 /* Assets.xcassets */,
 				64BE90FF2807AF1000ABE079 /* LaunchScreen.storyboard */,
 				64BE90FA2807AF0E00ABE079 /* Main.storyboard */,
+				64EFA89D283C986F0080D6C9 /* ConnectionManager.swift */,
 			);
 			path = ThumbKiss;
 			sourceTree = "<group>";
@@ -271,6 +274,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64EFA89E283C986F0080D6C9 /* ConnectionManager.swift in Sources */,
 				64BE90F72807AF0E00ABE079 /* GameScene.swift in Sources */,
 				64EFA89C283C8B970080D6C9 /* ConnectScene.swift in Sources */,
 				64BE90F92807AF0E00ABE079 /* GameViewController.swift in Sources */,
