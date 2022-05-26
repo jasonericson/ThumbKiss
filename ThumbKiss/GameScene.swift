@@ -9,9 +9,16 @@ import SpriteKit
 import GameplayKit
 import Network
 
+struct Packet: Codable {
+    var id: String
+    var pos: CGPoint
+}
+
 class GameScene: SKScene {
+    let jsonEncoder = JSONEncoder()
     private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
+    private var thisThumb : SKShapeNode?
+    private var otherThumb : SKShapeNode?
     
     override func didMove(to view: SKView) {
         
@@ -24,16 +31,26 @@ class GameScene: SKScene {
         
         // Create shape node to use during mouse interaction
         let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
         
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
+        self.thisThumb = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
+        
+        if let thisThumb = self.thisThumb {
+            thisThumb.lineWidth = 2.5
+            thisThumb.strokeColor = .blue
+            thisThumb.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
 //            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
 //                                              SKAction.fadeOut(withDuration: 0.5),
 //                                              SKAction.removeFromParent()]))
-            self.addChild(spinnyNode)
+        }
+        
+        self.otherThumb = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
+        
+        if let otherThumb = self.otherThumb {
+            otherThumb.lineWidth = 2.5
+            otherThumb.strokeColor = .red
+            otherThumb.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
+            
+            self.addChild(otherThumb)
         }
     }
     
@@ -71,7 +88,11 @@ class GameScene: SKScene {
 //            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
 //        }
         
-        if let n = self.spinnyNode {
+        if let n = self.thisThumb {
+            if self.children.contains(n) == false {
+                self.addChild(n)
+            }
+
             n.position = touch.location(in: self)
         }
         
@@ -83,7 +104,7 @@ class GameScene: SKScene {
             return
         }
 
-        if let n = self.spinnyNode {
+        if let n = self.thisThumb {
             n.position = touch.location(in: self)
         }
 //        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
@@ -91,6 +112,16 @@ class GameScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
 //        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+        
+        guard touches.first != nil else {
+            return
+        }
+        
+        if let n = self.thisThumb {
+            if self.children.contains(n) {
+                self.removeChildren(in: [n])
+            }
+        }
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -100,11 +131,13 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
-        if let n = self.spinnyNode {
+        if let n = self.thisThumb {
             if let c = ConnectionManager.instance.connection {
                 let screenSize = UIScreen.main.bounds
                 let posNormalized = CGPoint(x: n.position.x / screenSize.width + 0.5, y: n.position.y / screenSize.height + 0.5)
-                c.send(content: "(\(posNormalized.x), \(posNormalized.y))".data(using: .ascii), completion: .contentProcessed({ sendError in
+                let dataPacket = Packet(id: "w", pos: posNormalized)
+                let jsonData = try! jsonEncoder.encode(dataPacket)
+                c.send(content: jsonData, completion: .contentProcessed({ sendError in
                     if let error = sendError {
                         print("Unable to process and send the data: \(error)")
                     }
