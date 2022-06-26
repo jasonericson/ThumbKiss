@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		645086D32867E82800DF2678 /* SelectUserScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645086D22867E82800DF2678 /* SelectUserScene.swift */; };
+		645086D52867E94C00DF2678 /* SelectUserScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 645086D42867E94C00DF2678 /* SelectUserScene.sks */; };
 		645DD7C2286424BD00BB40EB /* thumbprint.png in Resources */ = {isa = PBXBuildFile; fileRef = 645DD7C1286424BD00BB40EB /* thumbprint.png */; };
 		645DD7C42867A26700BB40EB /* thumbprintBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 645DD7C32867A26600BB40EB /* thumbprintBlack.png */; };
 		64697CDA283C3AAC00F1E08D /* ConnectScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 64697CD9283C3AAC00F1E08D /* ConnectScene.sks */; };
@@ -43,6 +45,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		645086D22867E82800DF2678 /* SelectUserScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectUserScene.swift; sourceTree = "<group>"; };
+		645086D42867E94C00DF2678 /* SelectUserScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = SelectUserScene.sks; sourceTree = "<group>"; };
 		645DD7C1286424BD00BB40EB /* thumbprint.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = thumbprint.png; sourceTree = "<group>"; };
 		645DD7C32867A26600BB40EB /* thumbprintBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = thumbprintBlack.png; sourceTree = "<group>"; };
 		64697CD9283C3AAC00F1E08D /* ConnectScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = ConnectScene.sks; sourceTree = "<group>"; };
@@ -112,19 +116,21 @@
 		64BE90EF2807AF0E00ABE079 /* ThumbKiss */ = {
 			isa = PBXGroup;
 			children = (
+				645DD7C1286424BD00BB40EB /* thumbprint.png */,
 				645DD7C32867A26600BB40EB /* thumbprintBlack.png */,
 				64BE90F42807AF0E00ABE079 /* Actions.sks */,
 				64697CD9283C3AAC00F1E08D /* ConnectScene.sks */,
 				64BE90F22807AF0E00ABE079 /* GameScene.sks */,
+				645086D42867E94C00DF2678 /* SelectUserScene.sks */,
 				64BE90F02807AF0E00ABE079 /* AppDelegate.swift */,
+				64EFA89D283C986F0080D6C9 /* ConnectionManager.swift */,
 				64EFA89B283C8B970080D6C9 /* ConnectScene.swift */,
 				64BE90F62807AF0E00ABE079 /* GameScene.swift */,
 				64BE90F82807AF0E00ABE079 /* GameViewController.swift */,
+				645086D22867E82800DF2678 /* SelectUserScene.swift */,
 				64BE90FD2807AF1000ABE079 /* Assets.xcassets */,
-				645DD7C1286424BD00BB40EB /* thumbprint.png */,
 				64BE90FF2807AF1000ABE079 /* LaunchScreen.storyboard */,
 				64BE90FA2807AF0E00ABE079 /* Main.storyboard */,
-				64EFA89D283C986F0080D6C9 /* ConnectionManager.swift */,
 			);
 			path = ThumbKiss;
 			sourceTree = "<group>";
@@ -250,6 +256,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				645086D52867E94C00DF2678 /* SelectUserScene.sks in Resources */,
 				645DD7C42867A26700BB40EB /* thumbprintBlack.png in Resources */,
 				64BE90FC2807AF0E00ABE079 /* Main.storyboard in Resources */,
 				64BE90F32807AF0E00ABE079 /* GameScene.sks in Resources */,
@@ -283,6 +290,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				64EFA89E283C986F0080D6C9 /* ConnectionManager.swift in Sources */,
+				645086D32867E82800DF2678 /* SelectUserScene.swift in Sources */,
 				64BE90F72807AF0E00ABE079 /* GameScene.swift in Sources */,
 				64EFA89C283C8B970080D6C9 /* ConnectScene.swift in Sources */,
 				64BE90F92807AF0E00ABE079 /* GameViewController.swift in Sources */,

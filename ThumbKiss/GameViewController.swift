@@ -14,20 +14,30 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let view = self.view as! SKView? {
-            // Load the SKScene from 'GameScene.sks'
-            if let connectScene = SKScene(fileNamed: "ConnectScene") {
-                connectScene.scaleMode = .aspectFill
-                view.presentScene(connectScene)
-            }
+        var user = ""
+        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = dir.appendingPathComponent("user.txt")
             
-//            if let scene = SKScene(fileNamed: "GameScene") {
-//                // Set the scale mode to scale to fit the window
-//                scene.scaleMode = .aspectFill
-//
-//                // Present the scene
-//                view.presentScene(scene)
-//            }
+            do {
+                user = try String(contentsOf: fileURL, encoding: .ascii)
+            } catch {
+                print("Couldn't open file: \(error)")
+            }
+        }
+        
+        if let view = self.view as! SKView? {
+            if user == "w" || user == "j" {
+                ConnectionManager.instance.user = user
+                if let connectScene = SKScene(fileNamed: "ConnectScene") {
+                    connectScene.scaleMode = .aspectFill
+                    view.presentScene(connectScene)
+                }
+            } else {
+                if let selectUserScene = SelectUserScene(fileNamed: "SelectUserScene") {
+                    selectUserScene.scaleMode = .aspectFill
+                    view.presentScene(selectUserScene)
+                }
+            }
             
             view.ignoresSiblingOrder = true
             

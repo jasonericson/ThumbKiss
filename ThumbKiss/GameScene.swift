@@ -41,7 +41,9 @@ class GameScene: SKScene {
                     
                     self.otherThumbNormalizedX = p.pos.x
                     self.otherThumbNormalizedY = p.pos.y
+                    #if DEBUG
                     print("Other thumb pos: (\(p.pos.x), \(p.pos.y)")
+                    #endif
                 } catch {
                     print("failed to decode data: \(data)")
                 }
@@ -72,7 +74,7 @@ class GameScene: SKScene {
 
         if let s = ConnectionManager.instance.sendConnection {
             let posNormalized = CGPoint(x: 0.5, y: 0.5)
-            let dataPacket = Packet(id: "w", listenPort: Int(ConnectionManager.instance.listenPort.rawValue), pos: posNormalized)
+            let dataPacket = Packet(id: ConnectionManager.instance.user, listenPort: Int(ConnectionManager.instance.listenPort.rawValue), pos: posNormalized)
             let jsonData = try! jsonEncoder.encode(dataPacket)
             s.send(content: jsonData, completion: .contentProcessed({ sendError in
                 if let error = sendError {
@@ -133,7 +135,7 @@ class GameScene: SKScene {
                 if n.parent != nil {
                     let screenSize = UIScreen.main.bounds
                     let posNormalized = CGPoint(x: n.position.x / screenSize.width + 0.5, y: n.position.y / screenSize.height + 0.5)
-                    let dataPacket = Packet(id: "w", listenPort: 0, pos: posNormalized)
+                    let dataPacket = Packet(id: ConnectionManager.instance.user, listenPort: 0, pos: posNormalized)
                     let jsonData = try! jsonEncoder.encode(dataPacket)
                     c.send(content: jsonData, completion: .contentProcessed({ sendError in
                         if let error = sendError {
@@ -141,7 +143,7 @@ class GameScene: SKScene {
                         }
                     }))
                 } else {
-                    let dataPacket = Packet(id: "w", listenPort: 0, pos: CGPoint(x: -1.0, y: -1.0))
+                    let dataPacket = Packet(id: ConnectionManager.instance.user, listenPort: 0, pos: CGPoint(x: -1.0, y: -1.0))
                     let jsonData = try! jsonEncoder.encode(dataPacket)
                     c.send(content: jsonData, completion: .contentProcessed({ sendError in
                         if let error = sendError {

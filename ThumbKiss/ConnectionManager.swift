@@ -11,13 +11,17 @@ import Network
 class ConnectionManager {
     static let instance = ConnectionManager()
     
-    let host: NWEndpoint.Host = "127.0.0.1"
+    let host: NWEndpoint.Host = "45.90.223.47"
+//    let host: NWEndpoint.Host = "127.0.0.1"
     let port: NWEndpoint.Port = 1234
     let listenPort: NWEndpoint.Port = 1236
     
     var sendConnection : NWConnection?
 //    var receiveConnection : NWConnection?
 //    var listener : NWListener?
+    
+    // doesn't really fit here but I don't feel like making a whole other class
+    var user: String = ""
     
     private func startSingleConnection(connection: inout NWConnection?, viabilityUpdateHandler: ((_ isViable: Bool) -> Void)?) -> Bool {
         connection = NWConnection(host: host, port: port, using: .udp)
