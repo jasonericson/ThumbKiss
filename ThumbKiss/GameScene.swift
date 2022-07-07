@@ -6,6 +6,7 @@
 //
 
 import SpriteKit
+import CoreHaptics
 import GameplayKit
 import Network
 
@@ -24,6 +25,52 @@ class GameScene: SKScene {
     private var otherThumbNormalizedX = -1.0
     private var otherThumbNormalizedY = -1.0
     
+    private var collidingWithOtherThumb = false
+    
+    private let hapticsEngine = try? CHHapticEngine()
+    private var continuousPlayer : CHHapticPatternPlayer?
+    private let singleTapPattern = try? CHHapticPattern(
+        events: [
+            CHHapticEvent(
+                eventType: .hapticContinuous,
+                parameters: [
+                    CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.1)
+                ],
+                relativeTime: 0,
+                duration: 0.05)
+        ],
+        parameterCurves: [
+            CHHapticParameterCurve(
+                parameterID: .hapticIntensityControl,
+                controlPoints: [
+                    CHHapticParameterCurve.ControlPoint(relativeTime: 0, value: 0.6),
+                    CHHapticParameterCurve.ControlPoint(relativeTime: 0.05, value: 0.6)
+                ],
+                relativeTime: 0)
+        ])
+    
+    private let continuousPattern = try? CHHapticPattern(
+        events: [
+            CHHapticEvent(
+                eventType: .hapticContinuous,
+                parameters: [],
+                relativeTime: 0,
+                duration: 100)
+        ],
+        parameterCurves: [
+            CHHapticParameterCurve(
+                parameterID: .hapticIntensityControl,
+                controlPoints: [
+                    CHHapticParameterCurve.ControlPoint(relativeTime: 0, value: 0.1),
+                    CHHapticParameterCurve.ControlPoint(relativeTime: 4, value: 0.6)
+                ],
+                relativeTime: 0)
+        ])
+    
+    private var holdTime : Float = 0.0
+    private let maxHoldTime : Float = 4.0
+    private var lastUpdateTime : TimeInterval = 0
+    
     func queueReceiveMessage() {
         if let c = ConnectionManager.instance.sendConnection {
             c.receiveMessage { data, context, isComplete, error in
@@ -41,9 +88,6 @@ class GameScene: SKScene {
                     
                     self.otherThumbNormalizedX = p.pos.x
                     self.otherThumbNormalizedY = p.pos.y
-                    #if DEBUG
-                    print("Other thumb pos: (\(p.pos.x), \(p.pos.y)")
-                    #endif
                 } catch {
                     print("failed to decode data: \(data)")
                 }
@@ -84,6 +128,8 @@ class GameScene: SKScene {
         }
 
         queueReceiveMessage()
+        
+        try? self.hapticsEngine?.start()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -127,47 +173,141 @@ class GameScene: SKScene {
 //    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
 //    }
     
+    func getSqDistance(_ lhs: CGPoint, _ rhs: CGPoint) -> Float {
+        let x = lhs.x - rhs.x
+        let y = lhs.y - rhs.y
+        let dist = x * x + y * y
+        
+        return Float(dist)
+    }
+    
+    func startCollision() {
+        self.collidingWithOtherThumb = true
+        
+        guard let engine = self.hapticsEngine else { return }
+        
+        if let pattern = self.singleTapPattern {
+            let player = try? engine.makeAdvancedPlayer(with: pattern)
+            try? player?.start(atTime: 0)
+        }
+        
+        if let pattern = self.continuousPattern {
+            self.continuousPlayer = try? engine.makeAdvancedPlayer(with: pattern)
+            try? self.continuousPlayer?.start(atTime: 0)
+            // holdTime
+        }
+    }
+    
+    func continueCollision() {
+        
+    }
+    
+    func endCollisionWithKiss() {
+        self.collidingWithOtherThumb = false
+        
+        try? self.continuousPlayer?.stop(atTime: 0)
+        self.continuousPlayer = nil
+        
+        guard let engine = self.hapticsEngine else { return }
+        
+        let intensity = min(self.holdTime / self.maxHoldTime, 1.0)
+        if let pattern = try? CHHapticPattern(
+            events: [
+                CHHapticEvent(
+                    eventType: .hapticContinuous,
+                    parameters: [
+                        CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.6)
+                    ],
+                    relativeTime: 0,
+                    duration: 0.5)
+            ],
+            parameterCurves: [
+                CHHapticParameterCurve(
+                    parameterID: .hapticIntensityControl,
+                    controlPoints: [
+                        CHHapticParameterCurve.ControlPoint(relativeTime: 0, value: intensity),
+                        CHHapticParameterCurve.ControlPoint(relativeTime: 0.5, value: 0.0)
+                    ],
+                    relativeTime: 0)
+            ])
+        {
+            let player = try? engine.makePlayer(with: pattern)
+            try? player?.start(atTime: 0)
+        }
+        
+        self.holdTime = 0
+    }
+    
+    func cancelCollision() {
+        self.collidingWithOtherThumb = false
+        
+        try? self.continuousPlayer?.stop(atTime: 0)
+        self.continuousPlayer = nil
+        
+        self.holdTime = 0
+    }
     
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
-        if let c = ConnectionManager.instance.sendConnection {
-            if let n = self.thisThumb {
-                if n.parent != nil {
-                    let screenSize = UIScreen.main.bounds
-                    let posNormalized = CGPoint(x: n.position.x / screenSize.width + 0.5, y: n.position.y / screenSize.height + 0.5)
-                    let dataPacket = Packet(id: ConnectionManager.instance.user, listenPort: 0, pos: posNormalized)
-                    let jsonData = try! jsonEncoder.encode(dataPacket)
-                    c.send(content: jsonData, completion: .contentProcessed({ sendError in
-                        if let error = sendError {
-                            print("Unable to process and send the data: \(error)")
-                        }
-                    }))
-                } else {
-                    let dataPacket = Packet(id: ConnectionManager.instance.user, listenPort: 0, pos: CGPoint(x: -1.0, y: -1.0))
-                    let jsonData = try! jsonEncoder.encode(dataPacket)
-                    c.send(content: jsonData, completion: .contentProcessed({ sendError in
-                        if let error = sendError {
-                            print("Unable to process and send the data: \(error)")
-                        }
-                    }))
+        let deltaTime = currentTime - self.lastUpdateTime
+        self.lastUpdateTime = currentTime
+        
+        if self.continuousPlayer != nil {
+            self.holdTime += Float(deltaTime)
+        }
+        
+        guard let t = self.thisThumb, let o = self.otherThumb, let c = ConnectionManager.instance.sendConnection else { return }
+        
+        if t.parent != nil {
+            let screenSize = UIScreen.main.bounds
+            let posNormalized = CGPoint(x: t.position.x / screenSize.width + 0.5, y: t.position.y / screenSize.height + 0.5)
+            let dataPacket = Packet(id: ConnectionManager.instance.user, listenPort: 0, pos: posNormalized)
+            let jsonData = try! jsonEncoder.encode(dataPacket)
+            c.send(content: jsonData, completion: .contentProcessed({ sendError in
+                if let error = sendError {
+                    print("Unable to process and send the data: \(error)")
                 }
-            }
+            }))
+        } else {
+            let dataPacket = Packet(id: ConnectionManager.instance.user, listenPort: 0, pos: CGPoint(x: -1.0, y: -1.0))
+            let jsonData = try! jsonEncoder.encode(dataPacket)
+            c.send(content: jsonData, completion: .contentProcessed({ sendError in
+                if let error = sendError {
+                    print("Unable to process and send the data: \(error)")
+                }
+            }))
         }
 
-        if let o = self.otherThumb {
-            if self.otherThumbNormalizedX >= 0.0 && self.otherThumbNormalizedX <= 1.0 && self.otherThumbNormalizedY >= 0.0 && self.otherThumbNormalizedY <= 1.0 {
-                if o.parent == nil {
-                    self.addChild(o)
+        if self.otherThumbNormalizedX >= 0.0 && self.otherThumbNormalizedX <= 1.0 && self.otherThumbNormalizedY >= 0.0 && self.otherThumbNormalizedY <= 1.0 {
+            if o.parent == nil {
+                self.addChild(o)
+            }
+            
+            let screenSize = UIScreen.main.bounds
+            let pos = CGPoint(x: (self.otherThumbNormalizedX - 0.5) * screenSize.width, y: (self.otherThumbNormalizedY - 0.5) * screenSize.height)
+            
+            o.position = pos
+        } else {
+            if o.parent != nil {
+                self.removeChildren(in: [o])
+            }
+        }
+        
+        if o.parent != nil && t.parent != nil {
+            let collisionDistance: Float = 200.0
+            if getSqDistance(t.position, o.position) < collisionDistance * collisionDistance {
+                if !self.collidingWithOtherThumb {
+                    startCollision()
+                } else {
+                    continueCollision()
                 }
-                
-                let screenSize = UIScreen.main.bounds
-                let pos = CGPoint(x: (self.otherThumbNormalizedX - 0.5) * screenSize.width, y: (self.otherThumbNormalizedY - 0.5) * screenSize.height)
-                
-                o.position = pos
             } else {
-                if o.parent != nil {
-                    self.removeChildren(in: [o])
+                if self.collidingWithOtherThumb {
+                    cancelCollision()
                 }
+            }
+        } else if o.parent != nil || t.parent != nil {
+            if self.collidingWithOtherThumb {
+                endCollisionWithKiss()
             }
         }
     }
